@@ -26,10 +26,10 @@ class CountryService
             return [$resource => 0];
         })->all();
 
-        $data['resources'] = [
+        $data['resources'] = array_merge($data['resources'], [
             'money' => 1000,
             'energy' => 100
-        ];
+        ]);
 
         return Country::create($data);
     }

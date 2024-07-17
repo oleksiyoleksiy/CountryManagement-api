@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\ResourceEnum;
 use App\Services\Country\CountryService;
-use App\Traits\ValidationTrait;
+use App\Traits\CountryOperationTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
-    use HasFactory, ValidationTrait;
+    use HasFactory, CountryOperationTrait;
 
     protected $fillable = [
         'name',
@@ -28,18 +29,5 @@ class Country extends Model
     public function buildings(): BelongsToMany
     {
         return $this->belongsToMany(Building::class)->withPivot(['count', 'income_at']);
-    }
-
-    public function withdrawResources(Model $model)
-    {
-        $updatedResources = collect($this->resources)->mapWithKeys(function ($value, $resource) use ($model) {
-            return [$resource => $value - ($model->resources_price[$resource] ?? 0)];
-        });
-
-        $this->validateWithdraw($updatedResources);
-
-        $this->update([
-            'resources' => $updatedResources,
-        ]);
     }
 }

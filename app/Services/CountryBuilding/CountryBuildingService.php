@@ -2,10 +2,10 @@
 
 namespace App\Services\CountryBuilding;
 
+use App\Enums\ResourceEnum;
 use App\Models\Country;
 use App\Models\Building;
-use App\Models\CountryBuilding;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class CountryBuildingService
@@ -18,46 +18,29 @@ class CountryBuildingService
     public function store(Country $country, array $data)
     {
         $buildingId = $data['building_id'];
-
-        $selectedBuilding = Building::find($buildingId);
+        $selectedBuilding = Building::findOrFail($buildingId);
 
         $existingBuilding = $country->buildings()->where('building_id', $buildingId)->first();
 
-        $country->withdrawResources($selectedBuilding);
+        $this->withdrawResources($country, $selectedBuilding);
 
         if ($existingBuilding) {
-            $country->buildings()->updateExistingPivot($buildingId, [
-                'count' => $existingBuilding->pivot->count + 1,
-                'income_at' => now()->addMinutes($existingBuilding->cooldown)
-            ]);
+            $this->updateExistingBuilding($country, $existingBuilding, $buildingId);
         } else {
-            $country->buildings()->attach($buildingId, [
-                'count' => $data['count'] ?? 1,
-                'income_at' => now()->addMinutes($selectedBuilding->cooldown)
-            ]);
+            $this->attachNewBuilding($country, $selectedBuilding, $data);
         }
-
 
         return $country;
     }
 
-
     public function collectIncome(Country $country, array $data)
     {
         $buildingId = $data['building_id'];
+        $building = $country->buildings()->where('building_id', $buildingId)->firstOrFail();
 
-        $building = $country->buildings()->where('building_id', $buildingId)->first();
+        $this->validateIncome($building->pivot->income_at);
 
-        $incomeTime = $building->pivot->income_at;
-
-
-        $this->validateIncome($incomeTime);
-
-        $buildingCount = $building->pivot->count;
-
-        if ($building->resources_income) {
-            $this->updateResourcesIncome($country, $building, $buildingCount);
-        }
+        $this->updateResourcesIncome($country, $building, $building->pivot->count);
 
         $country->buildings()->updateExistingPivot($buildingId, [
             'income_at' => now()->addMinutes($building->cooldown)
@@ -66,39 +49,52 @@ class CountryBuildingService
         return $country;
     }
 
-    public function validateIncome($incomeTime)
+    private function withdrawResources(Country $country, Building $building)
+    {
+        $country->withdrawResources($building);
+
+        if (array_key_exists(ResourceEnum::ENERGY->value, $building->resources_income)) {
+            $country->addResource(ResourceEnum::ENERGY, $building->resources_income[ResourceEnum::ENERGY->value]);
+        }
+    }
+
+    private function updateExistingBuilding(Country $country, $existingBuilding, $buildingId)
+    {
+        $country->buildings()->updateExistingPivot($buildingId, [
+            'count' => $existingBuilding->pivot->count + 1,
+            'income_at' => now()->addMinutes($existingBuilding->cooldown)
+        ]);
+    }
+
+    private function attachNewBuilding(Country $country, Building $building, array $data)
+    {
+        $country->buildings()->attach($building->id, [
+            'count' => $data['count'] ?? 1,
+            'income_at' => now()->addMinutes($building->cooldown)
+        ]);
+    }
+
+    private function validateIncome($incomeTime)
     {
         if (now()->lte($incomeTime)) {
-            $timeLeft = $this->getTimeUntil($incomeTime);
-
             throw ValidationException::withMessages([
-                'message' => "until the next collect $timeLeft.",
+                'message' => "until the next collect " . $this->getTimeUntil($incomeTime),
             ]);
         }
     }
 
-
-    public function getTimeUntil($targetDate)
+    private function getTimeUntil($targetDate)
     {
-        $now = Carbon::now();
-        $target = Carbon::parse($targetDate);
-        $diff = $target->diffForHumans($now, ['parts' => 3, 'join' => ', ', 'syntax' => Carbon::DIFF_ABSOLUTE]);
-
-        return $diff;
+        return Carbon::now()->diffForHumans(Carbon::parse($targetDate), ['parts' => 3, 'join' => ', ', 'syntax' => Carbon::DIFF_ABSOLUTE]);
     }
 
-    private function updateResourcesIncome($country, $building, $buildingCount)
+    private function updateResourcesIncome(Country $country, $building, $buildingCount)
     {
         $updatedResources = collect($country->resources)->mapWithKeys(function ($value, $resource) use ($building, $buildingCount) {
-            $resourceIncome = array_key_exists($resource, $building->resources_income)
-                ? $building->resources_income[$resource] * $buildingCount
-                : 0;
-
+            $resourceIncome = array_key_exists($resource, $building->resources_income) ? $building->resources_income[$resource] * $buildingCount : 0;
             return [$resource => $value + $resourceIncome];
         });
 
-        $country->update([
-            'resources' => $updatedResources
-        ]);
+        $country->update(['resources' => $updatedResources]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\DTO\LoginDTO;
+use App\DTO\RegistrationDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\LoginRequest;
 use App\Http\Requests\Account\RegistrationRequest;
@@ -16,12 +18,20 @@ class AccountController extends Controller
 
     public function login(LoginRequest $request)
     {
-        return $this->service->login($request);
+        $data = $request->validated();
+
+        $dto = new LoginDTO(...$data);
+
+        return $this->service->login($dto);
     }
 
     public function register(RegistrationRequest $request)
     {
-        return $this->service->register($request);
+        $data = $request->validated();
+
+        $dto = new RegistrationDTO(...$data);
+
+        return $this->service->register($dto);
     }
 
     public function refresh(Request $request)

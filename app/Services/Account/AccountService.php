@@ -2,6 +2,8 @@
 
 namespace App\Services\Account;
 
+use App\DTO\LoginDTO;
+use App\DTO\RegistrationDTO;
 use App\Enums\TokenAbility;
 use App\Http\Requests\Account\LoginRequest;
 use App\Http\Requests\Account\RegistrationRequest;
@@ -14,9 +16,9 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AccountService
 {
-    public function login(LoginRequest $request)
+    public function login(LoginDTO $dto)
     {
-        $data = $request->validated();
+        $data = $dto->toArray();
 
         if (!Auth::attempt($data)) {
             return response()->json(['message' => 'authorization failed'], Response::HTTP_UNAUTHORIZED);
@@ -25,9 +27,9 @@ class AccountService
         return $this->createToken(Auth::user());
     }
 
-    public function register(RegistrationRequest $request)
+    public function register(RegistrationDTO $dto)
     {
-        $data = $request->validated();
+        $data = $dto->toArray();
 
         $user = User::create($data);
 

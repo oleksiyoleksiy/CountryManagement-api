@@ -2,6 +2,7 @@
 
 namespace App\Services\CountryBuilding;
 
+use App\DTO\CountryBuildingDTO;
 use App\Enums\ResourceEnum;
 use App\Models\Country;
 use App\Models\Building;
@@ -15,9 +16,10 @@ class CountryBuildingService
         return $country->buildings;
     }
 
-    public function store(Country $country, array $data)
+    public function store(Country $country, CountryBuildingDTO $dto)
     {
-        $buildingId = $data['building_id'];
+        $buildingId = $dto->buildingId;
+
         $selectedBuilding = Building::findOrFail($buildingId);
 
         $existingBuilding = $country->buildings()->where('building_id', $buildingId)->first();
@@ -27,15 +29,16 @@ class CountryBuildingService
         if ($existingBuilding) {
             $this->updateExistingBuilding($country, $existingBuilding, $buildingId);
         } else {
-            $this->attachNewBuilding($country, $selectedBuilding, $data);
+            $this->attachNewBuilding($country, $selectedBuilding);
         }
 
         return $country;
     }
 
-    public function collectIncome(Country $country, array $data)
+    public function collectIncome(Country $country, CountryBuildingDTO $dto)
     {
-        $buildingId = $data['building_id'];
+        $buildingId = $dto->buildingId;
+
         $building = $country->buildings()->where('building_id', $buildingId)->firstOrFail();
 
         $this->validateIncome($building->pivot->income_at);
@@ -66,10 +69,10 @@ class CountryBuildingService
         ]);
     }
 
-    private function attachNewBuilding(Country $country, Building $building, array $data)
+    private function attachNewBuilding(Country $country, Building $building)
     {
         $country->buildings()->attach($building->id, [
-            'count' => $data['count'] ?? 1,
+            'count' => 1,
             'income_at' => now()->addMinutes($building->cooldown)
         ]);
     }

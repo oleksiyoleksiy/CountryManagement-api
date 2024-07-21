@@ -3,6 +3,7 @@
 namespace App\Services\Country;
 
 use App\Constants;
+use App\DTO\CountryDTO;
 use App\Http\Requests\Country\CountryRequest;
 use App\Http\Requests\Country\StoreRequest;
 use App\Models\Country;
@@ -10,9 +11,9 @@ use Illuminate\Validation\ValidationException as ValidationValidationException;
 
 class CountryService
 {
-    public function store(StoreRequest $request)
+    public function store(CountryDTO $dto)
     {
-        $data = $request->validated();
+        $data = $dto->toArray();
 
         // $data['image'] = $request->file('image')->store('image');
 

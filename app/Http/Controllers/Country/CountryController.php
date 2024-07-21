@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Country;
 
+use App\DTO\CountryDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Country\CountryRequest;
 use App\Http\Requests\Country\StoreRequest;
@@ -29,7 +30,11 @@ class CountryController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        return CountryResource::make($this->service->store($request));
+        $data = $request->validated();
+
+        $dto = new CountryDTO(...$data);
+
+        return CountryResource::make($this->service->store($dto));
     }
 
     /**

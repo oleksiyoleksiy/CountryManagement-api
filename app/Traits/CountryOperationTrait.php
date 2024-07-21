@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Enums\ResourceEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 trait CountryOperationTrait
@@ -36,14 +37,22 @@ trait CountryOperationTrait
         ]);
     }
 
-    private function validateWithdraw($updatedResources)
+    private function validateWithdraw(Collection $updatedResources)
     {
+        $insufficientResources = [];
+
         foreach ($updatedResources as $resource => $value) {
             if ($value < 0) {
-                throw ValidationException::withMessages([
-                    'message' => "Insufficient amount of {$resource}.",
-                ]);
+                $insufficientResources[] = $resource;
             }
+        }
+
+        if (!empty($insufficientResources)) {
+            $resourcesStr = implode(', ', $insufficientResources);
+
+            throw ValidationException::withMessages([
+                'message' => "Insufficient amount of {$resourcesStr}.",
+            ]);
         }
     }
 }

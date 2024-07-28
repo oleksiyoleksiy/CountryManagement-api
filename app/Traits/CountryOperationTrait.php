@@ -55,4 +55,42 @@ trait CountryOperationTrait
             ]);
         }
     }
+    public function hasAnyRequiredResources($resources): bool
+    {
+        $requiredFossils = collect($resources)->keys()->intersect(ResourceEnum::fossils());
+
+        return $requiredFossils->isNotEmpty() && $requiredFossils->some(function ($fossil) {
+            return collect($this->available_resources)->contains($fossil);
+        });
+    }
+
+    public function formattedResources()
+    {
+        return collect($this->resources)->mapWithKeys(function ($value, $resource) {
+            return [$resource => $this->shortenNumber($value ?? 0)];
+        })->all();
+    }
+
+
+    private function shortenNumber(int $number)
+    {
+        if ($number >= 1000000000) {
+            return $this->formatNumber($number, 1000000000, 'B');
+        }
+        if ($number >= 1000000) {
+            return $this->formatNumber($number, 1000000, 'M');
+        }
+        if ($number >= 1000) {
+            return $this->formatNumber($number, 1000, 'K');
+        }
+
+        return (string)$number;
+    }
+
+    private function formatNumber($number, $divisor, $suffix)
+    {
+        $shortNumber = $number / $divisor;
+        $formattedNumber = floor($shortNumber * 100) / 100; // Обрізати до однієї десяткової частки без округлення
+        return "$formattedNumber$suffix";
+    }
 }

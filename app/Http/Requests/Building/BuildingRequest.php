@@ -23,7 +23,13 @@ class BuildingRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'image' => ['required', 'image', 'regex:jpg,png,svg,jpeg']
+            'image' => ['required', 'image'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'cooldown' => ['nullable', 'integer'],
+            'resources_income' => ['array'],
+            'resources_income.*' => ['required', 'integer'],
+            'resources_price' => ['array'],
+            'resources_price.*' => ['integer']
         ];
     }
 }

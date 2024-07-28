@@ -19,7 +19,7 @@ class CountryResource extends JsonResource
                 'id' => $this->id,
                 'name' => $this->name,
                 'available_resources' => $this->available_resources,
-                'resources' => $this->resources,
+                'resources' => $this->formattedResources(),
             ],
             'buildings' => BuildingResource::collection($this->buildings)
         ];

@@ -18,7 +18,7 @@ class BuildingResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'image' => $this->image,
+            'image' => $this->getImagePath(),
             'resources_income' => $this->resources_income,
             'resources_price' => $this->resources_price,
             'cooldown' => $this->cooldown,

@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Building;
 
+use App\DTO\BuildingDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\BuildingRequest;
-use App\Http\Requests\StoreBuildingsRequest;
-use App\Http\Requests\UpdateBuildingsRequest;
+use App\Http\Requests\Building\BuildingRequest;
 use App\Http\Resources\BuildingResource;
 use App\Models\Building;
 use App\Services\Building\BuildingService;
@@ -29,7 +28,11 @@ class BuildingController extends Controller
      */
     public function store(BuildingRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $dto = new BuildingDTO(...$data);
+
+        return BuildingResource::make($this->service->store($dto));
     }
 
     /**

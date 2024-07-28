@@ -18,9 +18,11 @@ class CountryBuildingService
 
     public function store(Country $country, CountryBuildingDTO $dto)
     {
-        $buildingId = $dto->buildingId;
+        $buildingId = $dto->building_id;
 
         $selectedBuilding = Building::findOrFail($buildingId);
+
+        $this->validateCountryBuildingStore($country, $selectedBuilding);
 
         $existingBuilding = $country->buildings()->where('building_id', $buildingId)->first();
 
@@ -37,7 +39,7 @@ class CountryBuildingService
 
     public function collectIncome(Country $country, CountryBuildingDTO $dto)
     {
-        $buildingId = $dto->buildingId;
+        $buildingId = $dto->building_id;
 
         $building = $country->buildings()->where('building_id', $buildingId)->firstOrFail();
 
@@ -86,6 +88,18 @@ class CountryBuildingService
         }
     }
 
+    private function validateCountryBuildingStore(Country $country, Building $building)
+    {
+        $buildingHasResourcesIncome = collect($building->resources_income)->keys()->intersect(ResourceEnum::fossils());
+
+        if ($buildingHasResourcesIncome->isNotEmpty() && !$country->hasAnyRequiredResources($building->resources_income)) {
+            throw ValidationException::withMessages([
+                'message' => "Your country doesn't have available any of the resources that building provides",
+            ]);
+        }
+    }
+
+
     private function getTimeUntil($targetDate)
     {
         return Carbon::now()->diffForHumans(Carbon::parse($targetDate), ['parts' => 3, 'join' => ', ', 'syntax' => Carbon::DIFF_ABSOLUTE]);
@@ -93,9 +107,17 @@ class CountryBuildingService
 
     private function updateResourcesIncome(Country $country, $building, $buildingCount)
     {
-        $updatedResources = collect($country->resources)->mapWithKeys(function ($value, $resource) use ($building, $buildingCount) {
-            $resourceIncome = array_key_exists($resource, $building->resources_income) ? $building->resources_income[$resource] * $buildingCount : 0;
-            return [$resource => $value + $resourceIncome];
+
+        $updatedResources = collect($country->resources)->mapWithKeys(function ($value, $resource) use ($country, $building, $buildingCount) {
+            $isFossils = in_array($resource, ResourceEnum::fossils());
+            $isAvailable = in_array($resource, $country->available_resources);
+            $isExists = array_key_exists($resource, $building->resources_income);
+
+            if ((($isFossils && $isAvailable) || !$isFossils) && $isExists) {
+                $resourceIncome = $building->resources_income[$resource] * $buildingCount;
+                return [$resource => $value + $resourceIncome];
+            }
+            return [$resource => $value];
         });
 
         $country->update(['resources' => $updatedResources]);

@@ -27,7 +27,7 @@ class CountryBuildingController extends Controller
     {
         $data = $request->validated();
 
-        $dto = new CountryBuildingDTO($data['building_id']);
+        $dto = new CountryBuildingDTO(...$data);
 
         return CountryResource::make($this->service->store($country, $dto));
     }
@@ -37,7 +37,7 @@ class CountryBuildingController extends Controller
 
         $data = $request->validated();
 
-        $dto = new CountryBuildingDTO($data['building_id']);
+        $dto = new CountryBuildingDTO(...$data);
 
         return CountryResource::make($this->service->collectIncome($country, $dto));
     }

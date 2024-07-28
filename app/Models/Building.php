@@ -20,6 +20,11 @@ class Building extends Model
 
     protected $casts = [
         'resources_income' => 'array',
-        'resources_price' => 'array'
+        'resources_price' => 'array',
     ];
+
+    public function getImagePath(): string
+    {
+        return env('APP_URL') . '/api/image/' . $this->image;
+    }
 }

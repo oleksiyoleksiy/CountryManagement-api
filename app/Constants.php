@@ -11,4 +11,6 @@ class Constants
         'copper',
         'uranium',
     ];
+
+    const MARKETPLACE_FEE = 2.5;
 }

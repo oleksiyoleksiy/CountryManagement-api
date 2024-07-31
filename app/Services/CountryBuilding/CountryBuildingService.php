@@ -29,9 +29,9 @@ class CountryBuildingService
         $this->withdrawResources($country, $selectedBuilding);
 
         if ($existingBuilding) {
-            $this->updateExistingBuilding($country, $existingBuilding, $buildingId);
+            $country->addBuilding($existingBuilding);
         } else {
-            $this->attachNewBuilding($country, $selectedBuilding);
+            $country->attachNewBuilding($selectedBuilding);
         }
 
         return $country;
@@ -61,22 +61,6 @@ class CountryBuildingService
         if (array_key_exists(ResourceEnum::ENERGY->value, $building->resources_income)) {
             $country->addResource(ResourceEnum::ENERGY, $building->resources_income[ResourceEnum::ENERGY->value]);
         }
-    }
-
-    private function updateExistingBuilding(Country $country, $existingBuilding, $buildingId)
-    {
-        $country->buildings()->updateExistingPivot($buildingId, [
-            'count' => $existingBuilding->pivot->count + 1,
-            'income_at' => now()->addMinutes($existingBuilding->cooldown)
-        ]);
-    }
-
-    private function attachNewBuilding(Country $country, Building $building)
-    {
-        $country->buildings()->attach($building->id, [
-            'count' => 1,
-            'income_at' => now()->addMinutes($building->cooldown)
-        ]);
     }
 
     private function validateIncome($incomeTime)

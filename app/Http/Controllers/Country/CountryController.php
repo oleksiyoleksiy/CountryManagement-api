@@ -13,53 +13,53 @@ use App\Services\Country\CountryService;
 
 class CountryController extends Controller
 {
-    public function __construct(private CountryService $service)
-    {
-    }
+  public function __construct(private CountryService $service)
+  {
+  }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return CountryResource::collection($this->service->index());
-    }
+  /**
+   * Display a listing of the resource.
+   */
+  public function index()
+  {
+    return CountryResource::collection($this->service->index());
+  }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreRequest $request)
-    {
-        $data = $request->validated();
+  /**
+   * Store a newly created resource in storage.
+   */
+  public function store(StoreRequest $request)
+  {
+    $data = $request->validated();
 
-        $dto = new CountryDTO(...$data);
+    $dto = new CountryDTO(...$data);
 
-        return CountryResource::make($this->service->store($dto));
-    }
+    return CountryResource::make($this->service->store($dto));
+  }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Country $country)
-    {
-        return CountryResource::make($country);
-    }
+  /**
+   * Display the specified resource.
+   */
+  public function show(Country $country)
+  {
+    return CountryResource::make($country);
+  }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCountryRequest $request, Country $country)
-    {
-        //
-    }
+  /**
+   * Update the specified resource in storage.
+   */
+  public function update(UpdateCountryRequest $request, Country $country)
+  {
+    //
+  }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Country $country)
-    {
-        $country->delete();
+  /**
+   * Remove the specified resource from storage.
+   */
+  public function destroy(Country $country)
+  {
+    $country->delete();
 
-        return response()->noContent();
-    }
+    return response()->noContent();
+  }
 }

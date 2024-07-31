@@ -2,7 +2,12 @@
 
 namespace App\Traits;
 
+use App\Constants;
+use App\Enums\ProductTypeEnum;
 use App\Enums\ResourceEnum;
+use App\Models\Building;
+use App\Models\Country;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -12,6 +17,12 @@ trait CountryOperationTrait
     public function addResource(ResourceEnum $resource, int $value)
     {
         $updatedValue = $this->resources[$resource->value] + $value;
+        $this->updateResource($resource->value, $updatedValue);
+    }
+
+    public function subtractResource(ResourceEnum $resource, int $value)
+    {
+        $updatedValue = $this->resources[$resource->value] - $value;
         $this->updateResource($resource->value, $updatedValue);
     }
 
@@ -92,5 +103,75 @@ trait CountryOperationTrait
         $shortNumber = $number / $divisor;
         $formattedNumber = floor($shortNumber * 100) / 100; // Обрізати до однієї десяткової частки без округлення
         return "$formattedNumber$suffix";
+    }
+
+    private function transfer(Country $country, Product $product)
+    {
+        $this->validateResource(ResourceEnum::MONEY, $product->price);
+
+        $this->subtractResource(ResourceEnum::MONEY, $product->price);
+
+        $country->addResource(ResourceEnum::MONEY, $product->price);
+
+        if ($product->isResource()) {
+            $this->addResource(ResourceEnum::from($product->resource), $this->count);
+            $country->subtractResource(ResourceEnum::from($product->resource), $this->count);
+        }
+
+        if ($product->isBuilding()) {
+            $building = Building::find($product->model_id);
+
+            $this->addBuilding($building, $product->count);
+            $country->subtractBuilding($building, $product->count);
+        }
+    }
+
+    public function addBuilding(Building $building, int $count = 1)
+    {
+        $this->buildings()->updateExistingPivot($building->id, [
+            'count' => $building->pivot->count + $count,
+            'income_at' => now()->addMinutes($building->cooldown)
+        ]);
+    }
+
+    public function subtractBuilding(Building $building, int $count = 1)
+    {
+        $buildingRelation = $this->buildings()->where('building_id', $building->id)->first();
+        $updatedCount = $buildingRelation->pivot->count - $count;
+
+        if ($updatedCount > 0) {
+            $this->buildings()->updateExistingPivot($building->id, [
+                'count' => $updatedCount,
+                'income_at' => now()->addMinutes($building->cooldown)
+            ]);
+        } else {
+            $this->buildings()->detach($building->id);
+        }
+    }
+
+    public function attachNewBuilding(Building $building)
+    {
+        $this->buildings()->attach($building->id, [
+            'count' => 1,
+            'income_at' => now()->addMinutes($building->cooldown)
+        ]);
+    }
+
+    public function withdrawMarketplaceFee(int $price)
+    {
+        $fee = floor(($price * Constants::MARKETPLACE_FEE) / 100);
+
+        $this->validateResource(ResourceEnum::MONEY, $fee);
+
+        $this->subtractResource(ResourceEnum::MONEY, $fee);
+    }
+
+    private function validateResource(ResourceEnum $resource, int $value)
+    {
+        if ($this->resources[$resource->value] < $value) {
+            throw ValidationException::withMessages([
+                'message' => "Insufficient amount of $resource->value.",
+            ]);
+        }
     }
 }

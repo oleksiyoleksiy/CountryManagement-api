@@ -128,10 +128,17 @@ trait CountryOperationTrait
 
     public function addBuilding(Building $building, int $count = 1)
     {
-        $this->buildings()->updateExistingPivot($building->id, [
-            'count' => $building->pivot->count + $count,
-            'income_at' => now()->addMinutes($building->cooldown)
-        ]);
+        $buildingRelation = $this->buildings()->where('building_id', $building->id)->first();
+
+        if ($buildingRelation) {
+            $updatedCount = $buildingRelation->pivot->count + $count;
+            $this->buildings()->updateExistingPivot($building->id, [
+                'count' => $updatedCount,
+                'income_at' => now()->addMinutes($building->cooldown)
+            ]);
+        } else {
+            $this->attachNewBuilding($building, $count);
+        }
     }
 
     public function subtractBuilding(Building $building, int $count = 1)
@@ -149,10 +156,10 @@ trait CountryOperationTrait
         }
     }
 
-    public function attachNewBuilding(Building $building)
+    private function attachNewBuilding(Building $building, int $count = 1)
     {
         $this->buildings()->attach($building->id, [
-            'count' => 1,
+            'count' => $count,
             'income_at' => now()->addMinutes($building->cooldown)
         ]);
     }
@@ -172,6 +179,32 @@ trait CountryOperationTrait
             throw ValidationException::withMessages([
                 'message' => "Insufficient amount of $resource->value.",
             ]);
+        }
+    }
+
+    public function transferFrom(Product $product)
+    {
+        if ($product->isResource()) {
+            $resource = ResourceEnum::from($product->resource);
+            $this->subtractResource($resource, $product->count);
+        }
+
+        if ($product->isBuilding()) {
+            $building = Building::find($product->model_id);
+            $this->subtractBuilding($building, $product->count);
+        }
+    }
+
+    public function transferTo(Product $product)
+    {
+        if ($product->isResource()) {
+            $resource = ResourceEnum::from($product->resource);
+            $this->addResource($resource, $product->count);
+        }
+
+        if ($product->isBuilding()) {
+            $building = Building::find($product->model_id);
+            $this->addBuilding($building, $product->count);
         }
     }
 }

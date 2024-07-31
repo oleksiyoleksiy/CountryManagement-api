@@ -30,4 +30,9 @@ class Country extends Model
     {
         return $this->belongsToMany(Building::class)->withPivot(['count', 'income_at']);
     }
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }

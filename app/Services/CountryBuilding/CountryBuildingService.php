@@ -20,19 +20,13 @@ class CountryBuildingService
     {
         $buildingId = $dto->building_id;
 
-        $selectedBuilding = Building::findOrFail($buildingId);
+        $building = Building::findOrFail($buildingId);
 
-        $this->validateCountryBuildingStore($country, $selectedBuilding);
+        $this->validateCountryBuildingStore($country, $building);
 
-        $existingBuilding = $country->buildings()->where('building_id', $buildingId)->first();
+        $this->withdrawResources($country, $building);
 
-        $this->withdrawResources($country, $selectedBuilding);
-
-        if ($existingBuilding) {
-            $country->addBuilding($existingBuilding);
-        } else {
-            $country->attachNewBuilding($selectedBuilding);
-        }
+        $country->addBuilding($building);
 
         return $country;
     }

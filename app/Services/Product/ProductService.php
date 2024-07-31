@@ -3,6 +3,7 @@
 namespace App\Services\Product;
 
 use App\DTO\ProductDTO;
+use App\DTO\UpdateProductDTO;
 use App\Enums\ProductTypeEnum;
 use App\Enums\ResourceEnum;
 use App\Http\Resources\ProductResource;
@@ -31,21 +32,29 @@ class ProductService
 
         $product = Product::create($data);
 
-        $this->withdrawFromCountry($product, $country);
+        $country->transferFrom($product);
 
         return $product;
     }
 
-    private function withdrawFromCountry(Product $product, Country $country)
+    public function update(Country $country, Product $product, UpdateProductDTO $dto)
     {
-        if ($product->isResource()) {
-            $resource = ResourceEnum::from($product->resource);
-            $country->subtractResource($resource, $product->count);
+        $data = $dto->toArray();
+
+        if ($dto->count !== $product->count) {
+            $country->transferTo($product);
+            $country->transferFrom($product);
         }
 
-        if ($product->isBuilding()) {
-            $building = Building::find($product->model_id);
-            $country->subtractBuilding($building, $product->count);
-        }
+        $product->update($data);
+
+        return $product;
+    }
+
+    public function delete(Country $country, Product $product)
+    {
+        $country->transferTo($product);
+
+        $product->delete();
     }
 }

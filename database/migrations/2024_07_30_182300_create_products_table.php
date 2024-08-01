@@ -14,9 +14,9 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class);
+            $table->foreignIdFor(Country::class)->nullable();
             $table->unsignedInteger('type');
-            $table->string('resource')->nullable();
+            $table->string('fossil')->nullable();
             $table->unsignedBigInteger('model_id')->nullable();
             $table->unsignedBigInteger('count');
             $table->unsignedBigInteger('price');

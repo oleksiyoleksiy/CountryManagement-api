@@ -17,6 +17,8 @@ Route::middleware(['auth:sanctum', 'ability:' . TokenAbility::ACCESS_API->value]
     Route::resource('country', CountryController::class);
     Route::resource('country.building', CountryBuildingController::class);
     Route::resource('country.product', ProductController::class);
+    Route::get('/country/{country}/country-product', [ProductController::class, 'countryIndex']);
+    Route::post('/country/{country}/product/{product}/purchase', [ProductController::class, 'purchase']);
     Route::post('/country/{country}/building/income', [CountryBuildingController::class, 'collectIncome']);
 });
 

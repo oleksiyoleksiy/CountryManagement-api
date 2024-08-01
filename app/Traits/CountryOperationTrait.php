@@ -105,27 +105,6 @@ trait CountryOperationTrait
         return "$formattedNumber$suffix";
     }
 
-    private function transfer(Country $country, Product $product)
-    {
-        $this->validateResource(ResourceEnum::MONEY, $product->price);
-
-        $this->subtractResource(ResourceEnum::MONEY, $product->price);
-
-        $country->addResource(ResourceEnum::MONEY, $product->price);
-
-        if ($product->isResource()) {
-            $this->addResource(ResourceEnum::from($product->resource), $this->count);
-            $country->subtractResource(ResourceEnum::from($product->resource), $this->count);
-        }
-
-        if ($product->isBuilding()) {
-            $building = Building::find($product->model_id);
-
-            $this->addBuilding($building, $product->count);
-            $country->subtractBuilding($building, $product->count);
-        }
-    }
-
     public function addBuilding(Building $building, int $count = 1)
     {
         $buildingRelation = $this->buildings()->where('building_id', $building->id)->first();
@@ -173,7 +152,7 @@ trait CountryOperationTrait
         $this->subtractResource(ResourceEnum::MONEY, $fee);
     }
 
-    private function validateResource(ResourceEnum $resource, int $value)
+    public function validateResource(ResourceEnum $resource, int $value)
     {
         if ($this->resources[$resource->value] < $value) {
             throw ValidationException::withMessages([
@@ -182,29 +161,19 @@ trait CountryOperationTrait
         }
     }
 
-    public function transferFrom(Product $product)
+    public function transferFrom(Product $product, int $count)
     {
-        if ($product->isResource()) {
-            $resource = ResourceEnum::from($product->resource);
-            $this->subtractResource($resource, $product->count);
-        }
-
-        if ($product->isBuilding()) {
-            $building = Building::find($product->model_id);
-            $this->subtractBuilding($building, $product->count);
+        if ($product->isFossil()) {
+            $resource = ResourceEnum::from($product->fossil);
+            $this->subtractResource($resource, $count);
         }
     }
 
-    public function transferTo(Product $product)
+    public function transferTo(Product $product, int $count)
     {
-        if ($product->isResource()) {
-            $resource = ResourceEnum::from($product->resource);
-            $this->addResource($resource, $product->count);
-        }
-
-        if ($product->isBuilding()) {
-            $building = Building::find($product->model_id);
-            $this->addBuilding($building, $product->count);
+        if ($product->isFossil()) {
+            $resource = ResourceEnum::from($product->fossil);
+            $this->addResource($resource, $count);
         }
     }
 }

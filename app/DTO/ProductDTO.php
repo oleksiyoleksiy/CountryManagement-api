@@ -8,8 +8,8 @@ class ProductDTO
         public int $type,
         public int $count,
         public int $price,
-        public int $model_id,
-        public string $resource
+        public int|null $model_id = null,
+        public string|null $fossil = null
     ) {
     }
 
@@ -20,7 +20,7 @@ class ProductDTO
             'count' => $this->count,
             'price' => $this->price,
             'model_id' => $this->model_id,
-            'resource' => $this->resource
+            'fossil' => $this->fossil
         ];
     }
 }

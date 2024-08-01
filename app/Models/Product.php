@@ -13,22 +13,18 @@ class Product extends Model
 
     protected $fillable = [
         'type',
-        'resource',
+        'fossil',
         'country_id',
         'model_id',
         'count',
         'price'
     ];
 
-    public function isResource(): bool
+    public function isFossil(): bool
     {
-        return ProductTypeEnum::from($this->type)->isResource();
+        return ProductTypeEnum::from($this->type)->isFossil();
     }
 
-    public function isBuilding(): bool
-    {
-        return ProductTypeEnum::from($this->type)->isBuilding();
-    }
 
     public function country(): BelongsTo
     {

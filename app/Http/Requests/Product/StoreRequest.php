@@ -28,8 +28,8 @@ class StoreRequest extends FormRequest
         return [
             'type' => ['required', 'integer', Rule::enum(ProductTypeEnum::class)],
             'count' => ['required', 'min:1', 'integer'],
-            'resource' => ['required_if:type,' . ProductTypeEnum::RESOURCE->value],
-            'model_id' => ['required_unless:type,' . ProductTypeEnum::RESOURCE->value],
+            'fossil' => ['required_if:type,' . ProductTypeEnum::FOSSIL->value],
+            'model_id' => ['required_unless:type,' . ProductTypeEnum::FOSSIL->value],
             'price' => ['required', 'min:1000', 'integer']
         ];
     }
@@ -41,20 +41,20 @@ class StoreRequest extends FormRequest
             $country = Country::find($countryId)->first();
             $resources = $country->resources;
 
-            if (ProductTypeEnum::from($this->type)->isResource()) {
-                if ($resources[$this->resource] < $this->count) {
+            if (ProductTypeEnum::from($this->type)->isFossil()) {
+                if ($resources[$this->fossil] < $this->count) {
                     $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
                 }
             }
 
-            if (ProductTypeEnum::from($this->type)->isBuilding()) {
-                $building = $country->buildings()->where('building_id', $this->model_id)->first();
-                $isBuildingMissingOrInsufficient = !$building || $building->pivot->count < $this->count;
+            // if (ProductTypeEnum::from($this->type)->isBuilding()) {
+            //     $building = $country->buildings()->where('building_id', $this->model_id)->first();
+            //     $isBuildingMissingOrInsufficient = !$building || $building->pivot->count < $this->count;
 
-                if ($isBuildingMissingOrInsufficient) {
-                    $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
-                }
-            }
+            //     if ($isBuildingMissingOrInsufficient) {
+            //         $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
+            //     }
+            // }
         });
     }
 }

@@ -41,20 +41,20 @@ class UpdateRequest extends FormRequest
             $product = Product::find($productId)->first();
             $resources = $country->resources;
 
-            if (ProductTypeEnum::from($product->type)->isResource()) {
-                if ($resources[$product->resource] < $this->count) {
+            if (ProductTypeEnum::from($product->type)->isFossil()) {
+                if ($resources[$product->fossil] < $this->count) {
                     $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
                 }
             }
 
-            if (ProductTypeEnum::from($product->type)->isBuilding()) {
-                $building = $country->buildings()->where('building_id', $product->model_id)->first();
-                $isBuildingMissingOrInsufficient = !$building || $building->pivot->count < $this->count;
+            // if (ProductTypeEnum::from($product->type)->isBuilding()) {
+            //     $building = $country->buildings()->where('building_id', $product->model_id)->first();
+            //     $isBuildingMissingOrInsufficient = !$building || $building->pivot->count < $this->count;
 
-                if ($isBuildingMissingOrInsufficient) {
-                    $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
-                }
-            }
+            //     if ($isBuildingMissingOrInsufficient) {
+            //         $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
+            //     }
+            // }
         });
     }
 }

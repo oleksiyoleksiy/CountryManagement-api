@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Product;
 
 use App\DTO\ProductDTO;
+use App\DTO\PurchaseProductDTO;
 use App\DTO\UpdateProductDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductRequest;
+use App\Http\Requests\Product\PurchaseRequest;
 use App\Http\Requests\Product\StoreRequest;
 use App\Http\Requests\Product\UpdateRequest;
+use App\Http\Resources\CountryResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Country;
 use App\Models\Product;
@@ -28,6 +31,10 @@ class ProductController extends Controller
         return ProductResource::collection($this->service->index($country));
     }
 
+    public function countryIndex(Country $country)
+    {
+        return ProductResource::collection($this->service->countryIndex($country));
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -58,6 +65,15 @@ class ProductController extends Controller
         $dto = new UpdateProductDTO(...$data);
 
         return ProductResource::make($this->service->update($country, $product, $dto));
+    }
+
+    public function purchase(PurchaseRequest $request, Country $country, Product $product)
+    {
+        $data = $request->validated();
+
+        $dto = new PurchaseProductDTO(...$data);
+
+        return CountryResource::make($this->service->purchase($dto, $country, $product));
     }
 
     /**

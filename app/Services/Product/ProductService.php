@@ -3,9 +3,11 @@
 namespace App\Services\Product;
 
 use App\DTO\ProductDTO;
+use App\DTO\PurchaseProductDTO;
 use App\DTO\UpdateProductDTO;
 use App\Enums\ProductTypeEnum;
 use App\Enums\ResourceEnum;
+use App\Http\Requests\Product\PurchaseRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Building;
 use App\Models\Country;
@@ -17,9 +19,12 @@ class ProductService
 {
     public function index(Country $country)
     {
-        $products = Product::where('country_id', $country->id)->get();
+        return Product::where('country_id', '!=', $country->id)->get();
+    }
 
-        return ProductResource::collection($products);
+    public function countryIndex(Country $country)
+    {
+        return $country->products;
     }
 
     public function store(Country $country, ProductDTO $dto)
@@ -32,7 +37,7 @@ class ProductService
 
         $product = Product::create($data);
 
-        $country->transferFrom($product);
+        $country->transferFrom($product, $product->count);
 
         return $product;
     }
@@ -42,8 +47,8 @@ class ProductService
         $data = $dto->toArray();
 
         if ($dto->count !== $product->count) {
-            $country->transferTo($product);
-            $country->transferFrom($product);
+            $country->transferTo($product, $product->count);
+            $country->transferFrom($product, $dto->count);
         }
 
         $product->update($data);
@@ -53,8 +58,23 @@ class ProductService
 
     public function delete(Country $country, Product $product)
     {
-        $country->transferTo($product);
+        $country->transferTo($product, $product->count);
 
         $product->delete();
+    }
+
+    public function purchase(PurchaseProductDTO $dto, Country $country, Product $product)
+    {
+        $country->subtractResource(ResourceEnum::MONEY, $dto->count * $product->price);
+        $product->country->addResource(ResourceEnum::MONEY, $dto->count * $product->price);
+        $country->transferTo($product, $dto->count);
+
+        $difference = $product->count - $dto->count;
+
+        $difference === 0
+            ? $product->delete()
+            : $product->update(['count' => $difference]);
+
+        return $country;
     }
 }

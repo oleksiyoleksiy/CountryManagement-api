@@ -4,23 +4,11 @@ namespace App\Enums;
 
 enum ProductTypeEnum: int
 {
-    case RESOURCE = 1;
-    case BUILDING = 2;
+    case FOSSIL = 1;
 
-    public static function resources(): array
+    public function isFossil(): bool
     {
-        return [
-            self::cases(),
-        ];
+        return $this === self::FOSSIL;
     }
 
-    public function isResource(): bool
-    {
-        return $this === self::RESOURCE;
-    }
-
-    public function isBuilding(): bool
-    {
-        return $this === self::BUILDING;
-    }
 }

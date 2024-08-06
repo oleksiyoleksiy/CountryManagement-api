@@ -74,7 +74,5 @@ class ProductService
         $difference === 0
             ? $product->delete()
             : $product->update(['count' => $difference]);
-
-        return $country;
     }
 }

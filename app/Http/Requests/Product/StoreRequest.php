@@ -37,8 +37,7 @@ class StoreRequest extends FormRequest
     protected function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
-            $countryId = $this->route('country');
-            $country = Country::find($countryId)->first();
+            $country = $this->route('country');
             $resources = $country->resources;
 
             if (ProductTypeEnum::from($this->type)->isFossil()) {

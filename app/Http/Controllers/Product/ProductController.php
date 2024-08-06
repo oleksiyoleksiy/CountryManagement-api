@@ -44,7 +44,10 @@ class ProductController extends Controller
 
         $dto = new ProductDTO(...$data);
 
-        return ProductResource::make($this->service->store($country, $dto));
+        return [
+            'product' => ProductResource::make($this->service->store($country, $dto)),
+            'country' => CountryResource::make($country),
+        ];
     }
 
     /**
@@ -64,7 +67,11 @@ class ProductController extends Controller
 
         $dto = new UpdateProductDTO(...$data);
 
-        return ProductResource::make($this->service->update($country, $product, $dto));
+        return [
+            'product' => ProductResource::make($this->service->update($country, $product, $dto)),
+            'country' => CountryResource::make($country)
+        ];
+
     }
 
     public function purchase(PurchaseRequest $request, Country $country, Product $product)
@@ -73,7 +80,12 @@ class ProductController extends Controller
 
         $dto = new PurchaseProductDTO(...$data);
 
-        return CountryResource::make($this->service->purchase($dto, $country, $product));
+        $this->service->purchase($dto, $country, $product);
+
+        return [
+            'product' => ProductResource::make($product),
+            'country' => CountryResource::make($country)
+        ];
     }
 
     /**
@@ -83,6 +95,6 @@ class ProductController extends Controller
     {
         $this->service->delete($country, $product);
 
-        return response()->noContent();
+        return CountryResource::make($country);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\CountryBuilding;
 use App\DTO\CountryBuildingDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CountryBuilding\CountryBuildingRequest;
+use App\Http\Resources\BuildingResource;
 use App\Http\Resources\CountryBuildingResource;
 use App\Http\Resources\CountryResource;
 use App\Models\Building;
@@ -29,7 +30,9 @@ class CountryBuildingController extends Controller
 
         $dto = new CountryBuildingDTO(...$data);
 
-        return CountryResource::make($this->service->store($country, $dto));
+        $this->service->store($country, $dto);
+
+        return CountryBuildingResource::make($country);
     }
 
     public function collectIncome(Country $country, CountryBuildingRequest $request)
@@ -39,6 +42,8 @@ class CountryBuildingController extends Controller
 
         $dto = new CountryBuildingDTO(...$data);
 
-        return CountryResource::make($this->service->collectIncome($country, $dto));
+        $this->service->collectIncome($country, $dto);
+
+        return CountryBuildingResource::make($country);
     }
 }

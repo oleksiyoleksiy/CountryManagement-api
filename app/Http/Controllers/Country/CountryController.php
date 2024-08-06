@@ -7,59 +7,64 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Country\CountryRequest;
 use App\Http\Requests\Country\StoreRequest;
 use App\Http\Requests\UpdateCountryRequest;
+use App\Http\Resources\BuildingResource;
+use App\Http\Resources\CountryBuildingResource;
+use App\Http\Resources\CountryCollection;
 use App\Http\Resources\CountryResource;
 use App\Models\Country;
 use App\Services\Country\CountryService;
 
 class CountryController extends Controller
 {
-  public function __construct(private CountryService $service)
-  {
-  }
+    public function __construct(private CountryService $service)
+    {
+    }
 
-  /**
-   * Display a listing of the resource.
-   */
-  public function index()
-  {
-    return CountryResource::collection($this->service->index());
-  }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return CountryBuildingResource::collection($this->service->index());
+    }
 
-  /**
-   * Store a newly created resource in storage.
-   */
-  public function store(StoreRequest $request)
-  {
-    $data = $request->validated();
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreRequest $request)
+    {
+        $data = $request->validated();
 
-    $dto = new CountryDTO(...$data);
+        $dto = new CountryDTO(...$data);
 
-    return CountryResource::make($this->service->store($dto));
-  }
+        $country = $this->service->store($dto);
 
-  /**
-   * Display the specified resource.
-   */
-  public function show(Country $country)
-  {
-    return CountryResource::make($country);
-  }
+        return CountryBuildingResource::collection($country);
+    }
 
-  /**
-   * Update the specified resource in storage.
-   */
-  public function update(UpdateCountryRequest $request, Country $country)
-  {
-    //
-  }
+    /**
+     * Display the specified resource.
+     */
+    public function show(Country $country)
+    {
+        return CountryResource::make($country);
+    }
 
-  /**
-   * Remove the specified resource from storage.
-   */
-  public function destroy(Country $country)
-  {
-    $country->delete();
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateCountryRequest $request, Country $country)
+    {
+        //
+    }
 
-    return response()->noContent();
-  }
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Country $country)
+    {
+        $country->delete();
+
+        return response()->noContent();
+    }
 }

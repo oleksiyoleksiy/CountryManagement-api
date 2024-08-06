@@ -14,6 +14,9 @@ class CountryBuildingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'country' => CountryResource::make($this),
+            'buildings' => BuildingResource::collection($this->buildings)
+        ];
     }
 }

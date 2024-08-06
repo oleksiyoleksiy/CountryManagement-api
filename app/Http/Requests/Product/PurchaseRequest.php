@@ -35,10 +35,8 @@ class PurchaseRequest extends FormRequest
     protected function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
-            $countryId = $this->route('country');
-            $productId = $this->route('product');
-            $country = Country::find($countryId)->first();
-            $product = Product::find($productId)->first();
+            $country = $this->route('country');
+            $product = $this->route('product');
 
             $country->validateResource(ResourceEnum::MONEY, $this->count * $product->price);
 

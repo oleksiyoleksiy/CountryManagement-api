@@ -15,13 +15,10 @@ class CountryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'country' => [
-                'id' => $this->id,
-                'name' => $this->name,
-                'available_resources' => $this->available_resources,
-                'resources' => $this->formattedResources(),
-            ],
-            'buildings' => BuildingResource::collection($this->buildings)
+            'id' => $this->id,
+            'name' => $this->name,
+            'available_resources' => $this->available_resources,
+            'resources' => $this->formattedResources(),
         ];
     }
 }

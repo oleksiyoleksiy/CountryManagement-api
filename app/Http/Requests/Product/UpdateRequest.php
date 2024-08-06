@@ -35,14 +35,12 @@ class UpdateRequest extends FormRequest
     protected function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
-            $countryId = $this->route('country');
-            $productId = $this->route('product');
-            $country = Country::find($countryId)->first();
-            $product = Product::find($productId)->first();
+            $country = $this->route('country');
+            $product = $this->route('product');
             $resources = $country->resources;
 
             if (ProductTypeEnum::from($product->type)->isFossil()) {
-                if ($resources[$product->fossil] < $this->count) {
+                if ($resources[$product->fossil] + $product->count < $this->count) {
                     $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
                 }
             }

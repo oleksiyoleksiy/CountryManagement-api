@@ -27,8 +27,6 @@ class CountryBuildingService
         $this->withdrawResources($country, $building);
 
         $country->addBuilding($building);
-
-        return $country;
     }
 
     public function collectIncome(Country $country, CountryBuildingDTO $dto)
@@ -44,8 +42,6 @@ class CountryBuildingService
         $country->buildings()->updateExistingPivot($buildingId, [
             'income_at' => now()->addMinutes($building->cooldown)
         ]);
-
-        return $country;
     }
 
     private function withdrawResources(Country $country, Building $building)

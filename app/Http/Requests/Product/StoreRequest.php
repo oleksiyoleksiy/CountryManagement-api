@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Product;
 
+use App\Constants;
 use App\Enums\ProductTypeEnum;
 use App\Models\Country;
 use Illuminate\Foundation\Http\FormRequest;
@@ -44,6 +45,10 @@ class StoreRequest extends FormRequest
                 if ($resources[$this->fossil] < $this->count) {
                     $validator->errors()->add('count', 'The quantity indicated exceeds the available stock.');
                 }
+            }
+
+            if ($resources['money'] < Constants::MARKETPLACE_FEE) {
+                    $validator->errors()->add('fee', 'Not enough money to pay the marketplace fee.');
             }
 
             // if (ProductTypeEnum::from($this->type)->isBuilding()) {

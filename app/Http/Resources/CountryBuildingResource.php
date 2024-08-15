@@ -16,7 +16,7 @@ class CountryBuildingResource extends JsonResource
     {
         return [
             'country' => CountryResource::make($this),
-            'buildings' => BuildingResource::collection($this->buildings)
+            'buildings' => BuildingResource::collection($this->buildings ?? [])
         ];
     }
 }

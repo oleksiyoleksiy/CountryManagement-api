@@ -39,7 +39,7 @@ class CountryController extends Controller
 
         $country = $this->service->store($dto);
 
-        return CountryBuildingResource::collection($country);
+        return CountryBuildingResource::make($country);
     }
 
     /**

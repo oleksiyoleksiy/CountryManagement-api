@@ -21,7 +21,7 @@ class ProductResource extends JsonResource
             'image' => $this->isFossil() ? "/$this->fossil.webp" : null,
             'count' => $this->count,
             'price' => $this->price,
-            'seller' => $this->country->name
+            'country' => CountryResource::make($this->country)
         ];
     }
 }

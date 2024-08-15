@@ -12,5 +12,5 @@ class Constants
         'uranium',
     ];
 
-    const MARKETPLACE_FEE = 2.5;
+    const MARKETPLACE_FEE = 1000;
 }

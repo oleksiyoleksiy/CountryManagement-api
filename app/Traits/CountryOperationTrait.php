@@ -75,35 +75,35 @@ trait CountryOperationTrait
         });
     }
 
-    public function formattedResources()
-    {
-        return collect($this->resources)->mapWithKeys(function ($value, $resource) {
-            return [$resource => $this->shortenNumber($value ?? 0)];
-        })->all();
-    }
+    // public function formattedResources()
+    // {
+    //     return collect($this->resources)->mapWithKeys(function ($value, $resource) {
+    //         return [$resource => $this->shortenNumber($value ?? 0)];
+    //     })->all();
+    // }
 
 
-    private function shortenNumber(int $number)
-    {
-        if ($number >= 1000000000) {
-            return $this->formatNumber($number, 1000000000, 'B');
-        }
-        if ($number >= 1000000) {
-            return $this->formatNumber($number, 1000000, 'M');
-        }
-        if ($number >= 1000) {
-            return $this->formatNumber($number, 1000, 'K');
-        }
+    // private function shortenNumber(int $number)
+    // {
+    //     if ($number >= 1000000000) {
+    //         return $this->formatNumber($number, 1000000000, 'B');
+    //     }
+    //     if ($number >= 1000000) {
+    //         return $this->formatNumber($number, 1000000, 'M');
+    //     }
+    //     if ($number >= 1000) {
+    //         return $this->formatNumber($number, 1000, 'K');
+    //     }
 
-        return (string)$number;
-    }
+    //     return (string)$number;
+    // }
 
-    private function formatNumber($number, $divisor, $suffix)
-    {
-        $shortNumber = $number / $divisor;
-        $formattedNumber = floor($shortNumber * 100) / 100; // Обрізати до однієї десяткової частки без округлення
-        return "$formattedNumber$suffix";
-    }
+    // private function formatNumber($number, $divisor, $suffix)
+    // {
+    //     $shortNumber = $number / $divisor;
+    //     $formattedNumber = floor($shortNumber * 100) / 100; // Обрізати до однієї десяткової частки без округлення
+    //     return "$formattedNumber$suffix";
+    // }
 
     public function addBuilding(Building $building, int $count = 1)
     {
@@ -143,11 +143,9 @@ trait CountryOperationTrait
         ]);
     }
 
-    public function withdrawMarketplaceFee(int $price)
+    public function withdrawMarketplaceFee()
     {
-        $fee = floor(($price * Constants::MARKETPLACE_FEE) / 100);
-
-        $this->validateResource(ResourceEnum::MONEY, $fee);
+        $fee = Constants::MARKETPLACE_FEE;
 
         $this->subtractResource(ResourceEnum::MONEY, $fee);
     }

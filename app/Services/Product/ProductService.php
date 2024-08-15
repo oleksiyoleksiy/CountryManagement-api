@@ -7,6 +7,10 @@ use App\DTO\PurchaseProductDTO;
 use App\DTO\UpdateProductDTO;
 use App\Enums\ProductTypeEnum;
 use App\Enums\ResourceEnum;
+use App\Events\ProductDeleteEvent;
+use App\Events\ProductPurchaseEvent;
+use App\Events\ProductStoreEvent;
+use App\Events\ProductUpdateEvent;
 use App\Http\Requests\Product\PurchaseRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Building;
@@ -33,9 +37,11 @@ class ProductService
 
         $data['country_id'] = $country->id;
 
-        $country->withdrawMarketplaceFee($dto->price);
+        $country->withdrawMarketplaceFee();
 
         $product = Product::create($data);
+
+        broadcast(new ProductStoreEvent($product));
 
         $country->transferFrom($product, $product->count);
 
@@ -53,12 +59,16 @@ class ProductService
 
         $product->update($data);
 
+        broadcast(new ProductUpdateEvent($product));
+
         return $product;
     }
 
     public function delete(Country $country, Product $product)
     {
         $country->transferTo($product, $product->count);
+
+        broadcast(new ProductDeleteEvent($product));
 
         $product->delete();
     }
@@ -71,8 +81,13 @@ class ProductService
 
         $difference = $product->count - $dto->count;
 
-        $difference === 0
-            ? $product->delete()
-            : $product->update(['count' => $difference]);
+        if ($difference === 0) {
+            $deletedProduct = $product->toArray();
+            broadcast(new ProductPurchaseEvent($deletedProduct, true));
+            $product->delete();
+        } else {
+            $product->update(['count' => $difference]);
+            broadcast(new ProductPurchaseEvent($product));
+        }
     }
 }

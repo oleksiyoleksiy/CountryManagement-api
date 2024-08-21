@@ -6,6 +6,7 @@ use App\Http\Controllers\Building\BuildingController;
 use App\Http\Controllers\Country\CountryController;
 use App\Http\Controllers\CountryBuilding\CountryBuildingController;
 use App\Http\Controllers\Image\ImageController;
+use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ Route::middleware(['auth:sanctum', 'ability:' . TokenAbility::ACCESS_API->value]
     Route::resource('building', BuildingController::class);
     Route::resource('country', CountryController::class);
     Route::resource('country.building', CountryBuildingController::class);
+    Route::resource('country.message', MessageController::class);
     Route::resource('country.product', ProductController::class);
     Route::get('/country/{country}/country-product', [ProductController::class, 'countryIndex']);
     Route::post('/country/{country}/product/{product}/purchase', [ProductController::class, 'purchase']);

@@ -10,6 +10,9 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 Broadcast::channel('general', function ($user) {
-    // You can add any additional authorization logic here if needed.
+    return $user !== null;
+});
+
+Broadcast::channel('chat', function ($user) {
     return $user !== null;
 });

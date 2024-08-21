@@ -35,4 +35,9 @@ class Country extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
 }

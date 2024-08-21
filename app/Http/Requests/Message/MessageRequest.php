@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Country;
+namespace App\Http\Requests\Message;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreRequest extends FormRequest
+class MessageRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,7 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:50']
-            // 'image' => ['required', 'image']
+            'content' => ['required', 'string', 'max:1000'],
         ];
     }
 }

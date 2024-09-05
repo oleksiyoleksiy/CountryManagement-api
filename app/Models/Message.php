@@ -22,6 +22,6 @@ class Message extends Model
 
     public function isOwner(Country $country): bool
     {
-        return $this->country->id === $country;
+        return $this->country->id === $country->id;
     }
 }

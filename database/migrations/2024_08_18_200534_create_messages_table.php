@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class);
+            $table->foreignIdFor(Country::class)->constrained()->cascadeOnDelete();
             $table->text('content');
             $table->timestamps();
         });

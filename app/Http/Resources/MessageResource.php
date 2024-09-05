@@ -17,7 +17,6 @@ class MessageResource extends JsonResource
         return [
             'id' => $this->id,
             'content' => $this->content,
-            'is_owner' => $this->isOwner($this->country),
             'country' => CountryResource::make($this->country),
         ];
     }
